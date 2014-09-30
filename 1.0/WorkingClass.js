@@ -4,10 +4,11 @@ WorkingClass = {
 	initBindsAll: true,
 	initSynthesizes: true,
 
-	init: function( obj ){
-
+	init: function( obj, sup ){
+			
 		if( WorkingClass.initBindsAll ) WorkingClass.bindAll( obj );
 		if( WorkingClass.initSynthesizes ) WorkingClass.synthesize( obj );
+
 	},
 
 	bindAll: function( obj ){
@@ -33,4 +34,13 @@ WorkingClass = {
 			}
 		}
 	}
+
 };
+
+
+
+
+
+
+
+

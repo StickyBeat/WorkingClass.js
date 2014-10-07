@@ -54,7 +54,6 @@ WorkingClass = {
 					};
 
 				})( v );
-
 			}
 		}
 	}

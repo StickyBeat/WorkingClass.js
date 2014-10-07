@@ -2,12 +2,10 @@
 WorkingClass = {
 
 	initBindsAll: true,
-	initSynthesizes: true,
 
 	init: function( obj, sup ){
 			
 		if( WorkingClass.initBindsAll ) WorkingClass.bindAll( obj );
-		if( WorkingClass.initSynthesizes ) WorkingClass.synthesize( obj );
 
 	},
 
@@ -15,22 +13,48 @@ WorkingClass = {
 
 		for( var a in obj ){
 			var b = obj[ a ];
+			
+			if( a == 'super' )continue;
+
 			if( typeof( b ) == 'function' ){
 				obj[a]=b.bind(obj);
 			}
 		}
+
+		if( obj.super ){
+			for( var a in obj.super ){
+				var b = obj.super[ a ];
+				if( typeof( b ) == 'function' ){
+					obj.super[a]=b.bind(obj);
+				}
+			}
+		}
 	},
 
-	synthesize: function( obj ){
 
-		for( var a in obj ){
-			var b = obj[ a ];
-			if( typeof( b ) != 'function' ){
-				var c = a.substr(0,1).toUpperCase() + a.substr(1);
-				var g = 'get'+c;
-				if( !obj[g] ) obj[g]=function(){ return this.a[ this.b ] }.bind({a:obj,b:a});
-				var s = 'set'+c;
-				if( !obj[s] ) obj[s]=function(v){ return this.a[ this.b ] = v; }.bind({a:obj,b:a});
+	extend: function( cls, sup ){
+
+		cls.prototype = Object.create( sup.prototype );
+		cls.prototype.constructor = cls;
+		cls.prototype.super = function(){
+			sup.apply( this, arguments );
+		};
+
+		for( var name in sup.prototype ){
+
+			var v = sup.prototype[ name ];
+
+			if( typeof( v ) == 'function' ){
+
+				(function( v ){
+
+					cls.prototype.super[ name ] = function(){
+
+						return v.apply( this, arguments );
+					};
+
+				})( v );
+
 			}
 		}
 	}

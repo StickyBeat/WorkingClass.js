@@ -14,10 +14,11 @@ WorkingClass = {
 		for( var a in obj ){
 			var b = obj[ a ];
 			
-			if( a == 'super' )continue;
-
 			if( typeof( b ) == 'function' ){
 				obj[a]=b.bind(obj);
+				for( var n in b ){
+					obj[a][n]=b[n];
+				}
 			}
 		}
 

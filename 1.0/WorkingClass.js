@@ -6,7 +6,6 @@ WorkingClass = {
 	init: function( obj, sup ){
 			
 		if( WorkingClass.initBindsAll ) WorkingClass.bindAll( obj );
-
 	},
 
 	bindAll: function( obj ){
@@ -58,9 +57,8 @@ WorkingClass = {
 				if( q == arguments.callee.caller ){
 					break;
 				}
-				else{
-					f = q;
-				}
+
+				f = q;
 			}
 
 			f.apply( this, arguments );
@@ -86,9 +84,8 @@ WorkingClass = {
 							if( q == arguments.callee.caller ){
 								break;
 							}
-							else{
-								f = q;
-							}
+
+							f = q;
 						}
 
 						return f.apply( this, arguments );
@@ -97,6 +94,30 @@ WorkingClass = {
 				})( name );
 			}
 		}
+	},
+
+	define: function(){
+
+		var a = 0;
+
+		var cls = arguments[ a++ ];
+
+		if( typeof( arguments[ a ] ) == 'function' ){
+			var sup = arguments[ a++ ];
+			WorkingClass.extend( cls, sup );
+		}
+
+		var fld = arguments[ a++ ];
+
+		for( var n in fld ){
+			cls.prototype[ n ] = fld[ n ];
+		}
+
+		cls.prototype.workingClass = function(){
+			WorkingClass.init( this );
+		};
+
+		return cls;
 	}
 
 };

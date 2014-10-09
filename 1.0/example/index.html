@@ -1,0 +1,81 @@
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>StickyTemplate Example</title>
+
+		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+		<script type="text/javascript" src="../WorkingClass.js"></script>
+
+	</head>
+	<body>
+
+		<script type="text/javascript">
+
+			Human = function(){
+				console.log( 'Human' );
+				WorkingClass.init( this );
+			};
+
+			Human.prototype.talk = function( v ){
+				console.log( 'Hello, ' + v, this.p );
+			};
+
+			// -------------
+
+			StupidHuman = function(){
+				console.log( 'StupidHuman' );
+				WorkingClass.init( this );
+				this.super();
+			};
+
+			WorkingClass.extend( StupidHuman, Human );
+
+			StupidHuman.prototype.talk = function( v ){
+				this.super.talk( v );
+				console.log( "I'm stupid", this.p );
+			};
+
+			// -------------
+
+			StupidOldHuman = function(){
+				console.log( 'StupidOldHuman' );
+				WorkingClass.init( this );
+				this.super();
+			};
+
+			WorkingClass.extend( StupidOldHuman, StupidHuman );
+
+			StupidOldHuman.prototype.talk = function( v ){
+				this.super.talk( v );
+				console.log( "I'm old", this.p );
+			};
+
+			// -------------
+
+			StupidOldUglyHuman = function(){
+				console.log( 'StupidOldUglyHuman' );
+				WorkingClass.init( this );
+				this.super();
+			};
+
+			WorkingClass.extend( StupidOldUglyHuman, StupidOldHuman );
+
+			StupidOldUglyHuman.prototype.talk = function( v ){
+				this.super.talk( v );
+				console.log( "I'm ugly", this.p );
+			};
+
+			// -------------
+
+			var bengt = new StupidOldUglyHuman();
+			bengt.p = 'ass';
+			bengt.talk( 'Mister' );
+
+			var callback = bengt.talk;
+
+			callback( 'Dr.');
+
+		</script>
+		
+	</body>
+</html>

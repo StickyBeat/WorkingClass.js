@@ -37,9 +37,35 @@ WorkingClass = {
 
 		cls.prototype = Object.create( sup.prototype );
 		cls.prototype.constructor = cls;
+
+		
+		if( !cls.prototype._super ){
+			cls.prototype._super = [];
+		}
+		cls.prototype._super.push( sup );
+
+
+
+
 		cls.prototype.super = function(){
-			sup.apply( this, arguments );
+
+			var f;
+
+			for( var j=0; j<this._super.length; j++ ){
+
+				var q = this._super[j];
+
+				if( q == arguments.callee.caller ){
+					break;
+				}
+				else{
+					f = q;
+				}
+			}
+
+			f.apply( this, arguments );
 		};
+
 
 		for( var name in sup.prototype ){
 
@@ -47,20 +73,33 @@ WorkingClass = {
 
 			if( typeof( v ) == 'function' ){
 
-				(function( v ){
+				(function( name ){
 
 					cls.prototype.super[ name ] = function(){
 
-						return v.apply( this, arguments );
+						var f;
+
+						for( var j=0; j<this._super.length; j++ ){
+
+							var q = this._super[j].prototype[ name ];
+
+							if( q == arguments.callee.caller ){
+								break;
+							}
+							else{
+								f = q;
+							}
+						}
+
+						return f.apply( this, arguments );
 					};
 
-				})( v );
+				})( name );
 			}
 		}
 	}
 
 };
-
 
 
 

@@ -1,0 +1,128 @@
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>WorkingClass.js Example</title>
+
+		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+		<script>
+
+Function.prototype.bind = function(oThis) {
+    if (typeof this !== 'function') {
+      // closest thing possible to the ECMAScript 5
+      // internal IsCallable function
+      throw new TypeError('Function.prototype.bind - what is trying to be bound is not callable');
+    }
+
+    var aArgs   = Array.prototype.slice.call(arguments, 1),
+        fToBind = this,
+        fNOP    = function() {},
+        fBound  = function() {
+          return fToBind.apply(this instanceof fNOP && oThis
+                 ? this
+                 : oThis,
+                 aArgs.concat(Array.prototype.slice.call(arguments)));
+        };
+
+    fNOP.prototype = this.prototype;
+    fBound.prototype = new fNOP();
+
+    return fBound;
+  };
+
+		</script>
+
+		<script type="text/javascript" src="../WorkingClass.js"></script>
+
+	</head>
+	<body>
+
+		<script type="text/javascript">
+
+			Human = WorkingClass.define( 
+
+				function(){
+					this.workingClass();
+
+					console.log( 'Human' );
+				},
+
+				{
+					talk: function( v ){
+						console.log( 'Hello, ' + v, this.p );
+					},
+
+					smile: function(){
+						console.log( 'We all smile.');
+					}
+				}
+
+			);
+
+			// -------------
+
+			StupidHuman = WorkingClass.define( 
+
+				function(){
+					this.workingClass();
+
+					console.log( 'StupidHuman' );
+					this.super();
+				},
+
+				Human,
+
+				{
+					talk: function( v ){
+						this.super.talk( v );
+						console.log( "I'm stupid", this.p );
+					}
+				}
+
+			);
+
+			// -------------
+
+			StupidOldHuman = function(){
+				console.log( 'StupidOldHuman' );
+				WorkingClass.init( this );
+				this.super();
+			};
+
+			WorkingClass.extend( StupidOldHuman, StupidHuman );
+
+			StupidOldHuman.prototype.talk = function( v ){
+				this.super.talk( v );
+				console.log( "I'm old", this.p );
+			};
+
+			// -------------
+
+			StupidOldUglyHuman = function(){
+				console.log( 'StupidOldUglyHuman' );
+				WorkingClass.init( this );
+				this.super();
+			};
+
+			WorkingClass.extend( StupidOldUglyHuman, StupidOldHuman );
+
+			StupidOldUglyHuman.prototype.talk = function( v ){
+				this.super.talk( v );
+				console.log( "I'm ugly", this.p );
+			};
+
+			// -------------
+
+			var bengt = new StupidOldUglyHuman();
+			bengt.p = 'ass';			
+			bengt.talk( 'Mister' );
+			bengt.smile( 'Mister' );
+
+			var callback = bengt.talk;
+
+			callback( 'Dr.');
+
+		</script>
+		
+	</body>
+</html>

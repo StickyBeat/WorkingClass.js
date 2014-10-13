@@ -11,6 +11,10 @@ WorkingClass = {
 	bindAll: function( obj ){
 
 		for( var a in obj ){
+			if( a=='bind' ){
+				continue;
+			}
+
 			var b = obj[ a ];
 			
 			if( typeof( b ) == 'function' ){
@@ -23,6 +27,10 @@ WorkingClass = {
 
 		if( obj.super ){
 			for( var a in obj.super ){
+				if( a=='bind' ){
+					continue;
+				}
+			
 				var b = obj.super[ a ];
 				if( typeof( b ) == 'function' ){
 					obj.super[a]=b.bind(obj);

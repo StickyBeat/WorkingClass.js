@@ -1,98 +1,136 @@
 
 WorkingClass = {
 
-	initBindsAll: true,
+	init: function( obj ){
 
-	init: function( obj, sup ){
-			
-		if( WorkingClass.initBindsAll ) WorkingClass.bindAll( obj );
-	},
+		if( obj ){
 
-	bindAll: function( obj ){
+			for( var a in obj ){
+				var b = obj[ a ];
+				
+				if( typeof( b ) == 'function' ){
+					obj[a]=b.bind(obj);
+					for( var n in b ){
+						obj[a][n]=b[n];
+					}
+				}
+			}
 
-		for( var a in obj ){
-			var b = obj[ a ];
-			
-			if( typeof( b ) == 'function' ){
-				obj[a]=b.bind(obj);
-				for( var n in b ){
-					obj[a][n]=b[n];
+			if( obj.super ){
+				for( var a in obj.super ){
+					var b = obj.super[ a ];
+					if( typeof( b ) == 'function' ){
+						obj.super[a]=b.bind(obj);
+					}
 				}
 			}
 		}
+		else{
 
-		if( obj.super ){
-			for( var a in obj.super ){
-				var b = obj.super[ a ];
-				if( typeof( b ) == 'function' ){
-					obj.super[a]=b.bind(obj);
-				}
-			}
+			WorkingClass.resolveExtensions();
 		}
 	},
 
 
 	extend: function( cls, sup ){
 
-		cls.prototype = Object.create( sup.prototype );
-		cls.prototype.constructor = cls;
+		//console.log( cls, sup );
 
-		if( sup.prototype._super ){
-			cls.prototype._super = sup.prototype._super.concat();
-		}
-		else{
-			cls.prototype._super = [];
-		}
+		if( typeof( sup ) == 'string' ){
 
-		cls.prototype._super.push( sup );
-
-
-		cls.prototype.super = function(){
-
-			var f;
-
-			for( var j=0; j<this._super.length; j++ ){
-
-				var q = this._super[j];
-
-				if( q == arguments.callee.caller ){
-					break;
-				}
-
-				f = q;
+			if( !WorkingClass.extensions ){
+				WorkingClass.extensions = {};
 			}
 
-			f.apply( this, arguments );
-		};
+			if( !WorkingClass.extensions[ sup ] ){
+				WorkingClass.extensions[ sup ] = [];
+			}
+
+			WorkingClass.extensions[ sup ].push( cls );
+		}
+		else{
+
+			for( var name in sup.prototype ){
+
+				if( name in cls.prototype ){
+					//console.log( name + ' is already in proto');
+					continue;
+				}
+
+				cls.prototype[ name ] = sup.prototype[ name ];
+			}
+			
+			//cls.prototype = Object.create( sup.prototype );
+
+			cls.prototype.constructor = cls;
+
+			if( sup.prototype._super ){
+				cls.prototype._super = sup.prototype._super.concat();
+			}
+			else{
+				cls.prototype._super = [];
+			}
+
+			cls.prototype._super.push( sup );
 
 
-		for( var name in sup.prototype ){
+			cls.prototype.super = function(){
 
-			var v = sup.prototype[ name ];
+				var f;
 
-			if( typeof( v ) == 'function' ){
+				for( var j=0; j<this._super.length; j++ ){
 
-				(function( name ){
+					var q = this._super[j];
 
-					cls.prototype.super[ name ] = function(){
+					if( q == arguments.callee.caller ){
+						break;
+					}
 
-						var f;
+					f = q;
+				}
 
-						for( var j=0; j<this._super.length; j++ ){
+				f.apply( this, arguments );
+			};
 
-							var q = this._super[j].prototype[ name ];
 
-							if( q == arguments.callee.caller ){
-								break;
+			for( var name in sup.prototype ){
+
+				/*
+				if( name in cls.prototype ){
+					console.log( name + ' is already in proto');
+					continue;
+				}
+				else{
+					console.log( name + ' is not in proto' );
+				}
+				*/
+
+				var v = sup.prototype[ name ];
+
+				if( typeof( v ) == 'function' ){
+
+					(function( name ){
+
+						cls.prototype.super[ name ] = function(){
+
+							var f;
+
+							for( var j=0; j<this._super.length; j++ ){
+
+								var q = this._super[j].prototype[ name ];
+
+								if( q == arguments.callee.caller ){
+									break;
+								}
+
+								f = q;
 							}
 
-							f = q;
-						}
+							return f.apply( this, arguments );
+						};
 
-						return f.apply( this, arguments );
-					};
-
-				})( name );
+					})( name );
+				}
 			}
 		}
 	},
@@ -103,22 +141,100 @@ WorkingClass = {
 
 		var cls = arguments[ a++ ];
 
-		if( typeof( arguments[ a ] ) == 'function' ){
-			var sup = arguments[ a++ ];
+		var type = typeof( arguments[ a ] );
+		var sup;
+
+		if( type == 'function' || type == 'string' ){
+			sup = arguments[ a++ ];
 			WorkingClass.extend( cls, sup );
 		}
 
 		var fld = arguments[ a++ ];
 
-		for( var n in fld ){
-			cls.prototype[ n ] = fld[ n ];
+		if( fld ){
+			for( var n in fld ){
+				cls.prototype[ n ] = fld[ n ];
+			}
 		}
 
-		cls.prototype.workingClass = function(){
-			WorkingClass.init( this );
-		};
+		if( !('workingClass' in cls.prototype ) ){
+			cls.prototype.workingClass = function(){
+				WorkingClass.init( this );
+			};
+		}
 
 		return cls;
+	},
+
+	resolveExtensions: function(){
+
+		if( WorkingClass.resolvedExtensions ){
+			return;
+		}
+
+		WorkingClass.resolvedExtensions = true;
+
+		if( !WorkingClass.extensions ){
+			return;
+		}
+
+		var classesByName = {};
+		var classNames = [];
+		for( var className in WorkingClass.extensions ){
+			
+			var cls = eval( className );
+
+			if( typeof( cls ) == 'function' ){
+				classesByName[ className ] = cls;
+				classNames.push( className );
+			}
+		}
+
+		function isSubclassOf( sub, sup ){
+
+			var subClasses = WorkingClass.extensions[ sup ];
+			
+			if( !subClasses ){
+				return false;
+			}
+
+			var cls = classesByName[ sub ];
+
+			return( subClasses.indexOf( cls ) != -1 );
+		};
+
+		//console.log( 'before', JSON.stringify( classNames ) );
+
+		classNames.sort(function(a,b){
+
+			if( isSubclassOf( a, b ) ){
+				console.log( a,'is subclass of',b);
+				return 1;
+			}
+			else if( isSubclassOf( b, a ) ){
+				console.log( b,'is subclass of',a);
+				return -1;
+			}
+			else{
+				console.log( a,'is equal to',b);
+				return 0;
+			}
+
+		});
+
+		//console.log( 'after', JSON.stringify( classNames ) );
+
+
+		for( var n=0; n<classNames.length; n++ ){
+			var className = classNames[ n ];
+			var sup = classesByName[ className ];
+			var subClasses = WorkingClass.extensions[ className ];
+			for( var m=0; m<subClasses.length; m++ ){
+				var sub = subClasses[ m ];
+				WorkingClass.extend( sub, sup );
+			}
+		}
+
 	}
 
 };

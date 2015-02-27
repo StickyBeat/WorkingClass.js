@@ -11,6 +11,8 @@
 
 		<script type="text/javascript">
 
+			/*
+
 			LivingThing = function(){
 
 				WorkingClass.init( this );
@@ -64,6 +66,14 @@
 
 			);
 			
+			WorkingClass.define( 
+				SmartHuman,
+				{
+					jump: function(){
+						console.log('jump!');
+					}
+				}
+			);
 
 
 			// -------------
@@ -134,6 +144,111 @@
 			var james = new SmartHuman();
 			james.p = 'cow';
 			james.talk('Professor');
+
+			james.jump();
+
+			*/
+
+
+
+			// -------------
+
+
+
+
+
+			SlaveClass = WorkingClass.define(
+				function(){
+					this.workingClass();
+					this.super();
+					console.log('new SlaveClass');
+				},
+				'SubClass',
+				{
+					method: function(){
+						this.super.method();
+						console.log('SlaveClass.method');
+					}
+				}
+				);
+
+
+			SubClass = WorkingClass.define(
+				function(){
+					this.workingClass();
+					this.super();
+					console.log('new SubClass');
+				},
+				'SuperClass',
+				{
+					method: function(){
+						this.super.method();
+						console.log('SubClass.method');
+					}
+				}
+				);
+
+
+			SuperClass = WorkingClass.define(
+				function(){
+					this.workingClass();
+					console.log('new SuperClass');
+				},
+				{
+					method: function(){
+						console.log('SuperClass.method');
+					}
+				}
+				);
+
+			
+			/*
+			SlaveClass = WorkingClass.define(
+				function(){
+					this.super();
+					console.log('new SlaveClass');
+				},
+				'SubClass',
+				{
+					method: function(){
+						this.super.method();
+						console.log('SlaveClass.method');
+					}
+				}
+				);
+
+			SubClass = WorkingClass.define(
+				function(){
+					this.super();
+					console.log('new SubClass');
+				},
+				'SuperClass',
+				{
+					method: function(){
+						this.super.method();
+						console.log('SubClass.method');
+					}
+				}
+				);
+
+			SuperClass = WorkingClass.define(
+				function(){
+					console.log('new SuperClass');
+				},
+				{
+					method: function(){
+						console.log('SuperClass.method');
+					}
+				}
+				);
+			*/
+
+
+
+			WorkingClass.init();
+
+			var instance = new SlaveClass();
+			instance.method();
 
 
 		</script>

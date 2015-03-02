@@ -50,17 +50,13 @@ WorkingClass = {
 		}
 		else{
 
-			for( var name in sup.prototype ){
+			var p = Object.create( cls.prototype );
 
-				if( name in cls.prototype ){
-					//console.log( name + ' is already in proto');
-					continue;
-				}
+			cls.prototype = Object.create( sup.prototype );
 
-				cls.prototype[ name ] = sup.prototype[ name ];
+			for( var name in p ){
+				cls.prototype[ name ] = p[ name ];
 			}
-			
-			//cls.prototype = Object.create( sup.prototype );
 
 			cls.prototype.constructor = cls;
 
@@ -203,26 +199,19 @@ WorkingClass = {
 			return( subClasses.indexOf( cls ) != -1 );
 		};
 
-		//console.log( 'before', JSON.stringify( classNames ) );
-
 		classNames.sort(function(a,b){
 
 			if( isSubclassOf( a, b ) ){
-				console.log( a,'is subclass of',b);
 				return 1;
 			}
 			else if( isSubclassOf( b, a ) ){
-				console.log( b,'is subclass of',a);
 				return -1;
 			}
 			else{
-				console.log( a,'is equal to',b);
 				return 0;
 			}
 
 		});
-
-		//console.log( 'after', JSON.stringify( classNames ) );
 
 
 		for( var n=0; n<classNames.length; n++ ){
